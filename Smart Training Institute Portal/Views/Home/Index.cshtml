@@ -1,8 +1,69 @@
 ﻿@{
-    ViewData["Title"] = "Home Page";
+    ViewData["Title"] = "Home";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
-</div>
+<section class="bg-light border rounded-3 p-5 mb-5">
+    <div class="row align-items-center g-4">
+        <div class="col-lg-7">
+            <p class="text-uppercase text-muted small fw-semibold mb-2">Smart Training Institute</p>
+            <h1 class="display-5 fw-semibold mb-3">Learn new skills, earn certifications, and build a stronger future.</h1>
+            <p class="lead text-muted">
+                Explore expert-led courses and gain industry-ready knowledge in a flexible, student-friendly platform.
+            </p>
+            <div class="d-flex flex-wrap gap-2">
+                <a asp-controller="Courses" asp-action="Catalog" class="btn btn-primary btn-lg">Browse Courses</a>
+                <a asp-controller="Courses" asp-action="LiveCatalog" class="btn btn-outline-secondary btn-lg">Live Catalog</a>
+            </div>
+        </div>
+        <div class="col-lg-5">
+            <div class="card shadow-sm border-0">
+                <div class="card-body">
+                    <h5 class="card-title fw-semibold">Why students choose us</h5>
+                    <ul class="list-unstyled mt-3 mb-0">
+                        <li class="d-flex gap-2 mb-2">
+                            <span class="badge bg-success rounded-pill"> </span>
+                            Hands-on learning with real-world projects.
+                        </li>
+                        <li class="d-flex gap-2 mb-2">
+                            <span class="badge bg-success rounded-pill"> </span>
+                            Dedicated instructors and personalized feedback.
+                        </li>
+                        <li class="d-flex gap-2">
+                            <span class="badge bg-success rounded-pill"> </span>
+                            Flexible schedules built for working professionals.
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="mb-5">
+    <div class="row g-4">
+        <div class="col-md-4">
+            <div class="card h-100 shadow-sm">
+                <div class="card-body">
+                    <h5 class="card-title fw-semibold">Career Tracks</h5>
+                    <p class="card-text text-muted">Curated learning paths in software, data, design, and business.</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card h-100 shadow-sm">
+                <div class="card-body">
+                    <h5 class="card-title fw-semibold">Top Instructors</h5>
+                    <p class="card-text text-muted">Learn from mentors with industry and academic excellence.</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card h-100 shadow-sm">
+                <div class="card-body">
+                    <h5 class="card-title fw-semibold">Flexible Learning</h5>
+                    <p class="card-text text-muted">Study anytime with blended sessions and on-demand materials.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
