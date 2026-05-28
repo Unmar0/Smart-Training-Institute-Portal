@@ -188,6 +188,36 @@ namespace Smart_Training_Institute_Portal.Controllers
             {
                 try
                 {
+                    var oldEnrollment = await _context.Enrollments
+                        .AsNoTracking()
+                        .FirstOrDefaultAsync(e => e.Id == id);
+
+                    if (oldEnrollment == null)
+                    {
+                        return NotFound();
+                    }
+
+                    var markChanged = oldEnrollment.Mark != enrollment.Mark;
+                    var gradeChanged = oldEnrollment.Grade != enrollment.Grade;
+
+                    if (markChanged || gradeChanged)
+                    {
+                        var auditLog = new GradeAuditLog
+                        {
+                            EnrollmentId = enrollment.Id,
+                            OldMark = oldEnrollment.Mark,
+                            NewMark = enrollment.Mark,
+                            OldGrade = oldEnrollment.Grade,
+                            NewGrade = enrollment.Grade,
+                            ChangedBy = _userManager.GetUserId(User) ?? string.Empty,
+                            Notes = "Grade information updated"
+                        };
+
+                        _context.GradeAuditLogs.Add(auditLog);
+                    }
+
+                    enrollment.UpdatedAt = DateTime.UtcNow;
+
                     _context.Update(enrollment);
                     await _context.SaveChangesAsync();
                     TempData["Success"] = "Enrollment and mark updated successfully.";

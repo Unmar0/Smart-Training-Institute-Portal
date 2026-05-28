@@ -119,6 +119,11 @@ namespace Smart_Training_Institute_Portal.Controllers.Api
 
             var result = await BuildCourseDto(course.Id);
 
+            if (result == null)
+            {
+                return NotFound();
+            }
+
             return CreatedAtAction(nameof(GetCourse), new { id = course.Id }, result);
         }
 
