@@ -5,7 +5,7 @@ using Smart_Training_Institute_Portal.DTOs;
 
 namespace Smart_Training_Institute_Portal.Controllers.Api
 {
-    [Route("api/[controller]")]
+    [Route("api/courses")]
     [ApiController]
     public class CoursesApiController : ControllerBase
     {

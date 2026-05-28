@@ -169,7 +169,9 @@ namespace Smart_Training_Institute_Portal.Controllers
             var course = await _context.Courses.FindAsync(id);
             if (course != null)
             {
-                _context.Courses.Remove(course);
+                course.IsDeleted = true;
+                course.DeletedAt = DateTime.UtcNow;
+                _context.Update(course);
             }
 
             await _context.SaveChangesAsync();

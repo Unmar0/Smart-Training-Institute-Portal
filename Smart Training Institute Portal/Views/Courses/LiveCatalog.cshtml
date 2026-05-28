@@ -16,7 +16,7 @@
             const container = document.getElementById('coursesContainer');
 
             try {
-                const response = await fetch('/api/CoursesApi');
+                const response = await fetch('/api/courses');
 
                 if (!response.ok) {
                     container.innerHTML = '<p>Failed to load courses.</p>';
