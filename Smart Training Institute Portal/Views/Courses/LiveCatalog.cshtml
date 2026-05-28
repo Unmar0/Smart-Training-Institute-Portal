@@ -1,0 +1,54 @@
+@{
+    ViewData["Title"] = "Live Course Catalog";
+}
+
+<div class="max-w-6xl mx-auto px-4 py-8">
+    <h1 class="text-3xl font-bold mb-6">Live Course Catalog</h1>
+
+    <div id="coursesContainer" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <p>Loading courses...</p>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        async function loadCourses() {
+            const container = document.getElementById('coursesContainer');
+
+            try {
+                const response = await fetch('/api/CoursesApi');
+
+                if (!response.ok) {
+                    container.innerHTML = '<p>Failed to load courses.</p>';
+                    return;
+                }
+
+                const courses = await response.json();
+
+                if (courses.length === 0) {
+                    container.innerHTML = '<p>No published courses found.</p>';
+                    return;
+                }
+
+                container.innerHTML = courses.map(course => `
+                    <div class="border rounded-lg p-5 shadow-sm">
+                        <h2 class="text-xl font-semibold mb-2">${course.title}</h2>
+                        <p class="text-sm mb-2">${course.code}</p>
+                        <p class="mb-3">${course.description}</p>
+                        <p><strong>Department:</strong> ${course.departmentName}</p>
+                        <p><strong>Credit Hours:</strong> ${course.creditHours} hours</p>
+                        <p><strong>Level:</strong> ${course.level ?? 'Not specified'}</p>
+                        <p><strong>Price:</strong> ${course.price ?? 'Free'}</p>
+                        <div class="mt-3">
+                            ${(course.tags || []).map(tag => `<span class="inline-block border rounded px-2 py-1 text-sm mr-1 mb-1">${tag}</span>`).join('')}
+                        </div>
+                    </div>
+                `).join('');
+            } catch (error) {
+                container.innerHTML = '<p>Error while loading courses.</p>';
+            }
+        }
+
+        loadCourses();
+    </script>
+}

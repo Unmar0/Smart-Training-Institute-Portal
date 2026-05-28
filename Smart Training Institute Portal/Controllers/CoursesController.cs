@@ -33,6 +33,12 @@ namespace Smart_Training_Institute_Portal.Controllers
             return View(courses);
         }
 
+        [AllowAnonymous]
+        public IActionResult LiveCatalog()
+        {
+            return View();
+        }
+
         // GET: Courses
         public async Task<IActionResult> Index()
         {
