@@ -50,7 +50,7 @@ namespace Smart_Training_Institute_Portal.Data
                 .HasColumnType("decimal(5,2)");
 
             builder.Entity<Enrollment>()
-                .HasOne(e => e.Profile)
+                .HasOne(e => e.StudentProfile)
                 .WithMany(s => s.Enrollments)
                 .HasForeignKey(e => e.StudentProfileId)
                 .OnDelete(DeleteBehavior.Restrict);
@@ -77,7 +77,7 @@ namespace Smart_Training_Institute_Portal.Data
 
             builder.Entity<GradeAuditLog>()
                 .HasOne(g => g.Enrollment)
-                .WithMany(e => e.GradeAuditLog)
+                .WithMany(e => e.GradeAuditLogs)
                 .HasForeignKey(g => g.EnrollmentId)
                 .OnDelete(DeleteBehavior.Cascade);
                 

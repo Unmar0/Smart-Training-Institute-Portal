@@ -18,13 +18,12 @@ namespace Smart_Training_Institute_Portal.Models
 
         [Required]
         public int StudentProfileId { get; set; }
-        public StudentProfile Profile { get; set; }
+        public StudentProfile StudentProfile { get; set; } = null!;
 
         public int CourseId { get; set; }
-        public Course Course { get; set; }
+        public Course Course { get; set; } = null!;
 
-        public ICollection<GradeAuditLog> GradeAuditLog { get; set; } = new List<GradeAuditLog>();
-
+        public ICollection<GradeAuditLog> GradeAuditLogs { get; set; } = new List<GradeAuditLog>();
 
     }
 }
