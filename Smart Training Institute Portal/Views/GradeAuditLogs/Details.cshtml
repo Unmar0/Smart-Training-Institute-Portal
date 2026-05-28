@@ -1,0 +1,42 @@
+@model Smart_Training_Institute_Portal.Models.GradeAuditLog
+
+@{
+    ViewData["Title"] = "Audit Log Details";
+}
+
+<h1>Audit Log Details</h1>
+
+<div>
+    <hr />
+    <dl class="row">
+        <dt class="col-sm-3">Date Changed</dt>
+        <dd class="col-sm-9">@Model.CreatedAt.ToLocalTime().ToString("g")</dd>
+
+        <dt class="col-sm-3">Student Name</dt>
+        <dd class="col-sm-9">@Model.Enrollment?.StudentProfile?.FullName</dd>
+
+        <dt class="col-sm-3">Course</dt>
+        <dd class="col-sm-9">@Model.Enrollment?.Course?.Title</dd>
+
+        <dt class="col-sm-3">Old Mark</dt>
+        <dd class="col-sm-9">@Model.OldMark</dd>
+
+        <dt class="col-sm-3">New Mark</dt>
+        <dd class="col-sm-9">@Model.NewMark</dd>
+
+        <dt class="col-sm-3">Old Grade</dt>
+        <dd class="col-sm-9">@Model.OldGrade</dd>
+
+        <dt class="col-sm-3">New Grade</dt>
+        <dd class="col-sm-9">@Model.NewGrade</dd>
+
+        <dt class="col-sm-3">Notes</dt>
+        <dd class="col-sm-9">@Model.Notes</dd>
+
+        <dt class="col-sm-3">Changed By</dt>
+        <dd class="col-sm-9">@Model.ChangedByUser?.Email</dd>
+    </dl>
+</div>
+<div>
+    <a asp-action="Index">Back to List</a>
+</div>

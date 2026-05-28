@@ -1,0 +1,32 @@
+@model IEnumerable<Smart_Training_Institute_Portal.Models.Course>
+
+@{
+    ViewData["Title"] = "Course Catalog";
+}
+
+<h1>Course Catalog</h1>
+
+<div>
+    @foreach (var course in Model)
+    {
+        <div>
+            <h2>@course.Title</h2>
+            <p>@course.Description</p>
+            <p>Department: @course.Department?.Name</p>
+            <p>Capacity: @course.Capacity students</p>
+            <p>Credit Hours: @course.CreditHours</p>
+            <p>Level: @course.Level</p>
+
+            @if (course.CourseTags != null && course.CourseTags.Any())
+            {
+                <p>
+                    Tags:
+                    @foreach (var tag in course.CourseTags)
+                    {
+                        <span>@tag.Name </span>
+                    }
+                </p>
+            }
+        </div>
+    }
+</div>
