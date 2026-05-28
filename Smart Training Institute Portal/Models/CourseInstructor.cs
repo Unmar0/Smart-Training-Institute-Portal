@@ -2,7 +2,7 @@
 
 namespace Smart_Training_Institute_Portal.Models
 {
-    public class CourseInstructor
+    public class CourseInstructor : BaseEntity
     {
         public int CourseId { get; set; }
         public Course Course { get; set; }

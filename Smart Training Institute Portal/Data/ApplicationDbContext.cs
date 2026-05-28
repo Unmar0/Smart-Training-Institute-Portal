@@ -26,7 +26,8 @@ namespace Smart_Training_Institute_Portal.Data
 
             // Configure CourseInstructor many-to-many join entity
             builder.Entity<CourseInstructor>()
-                .HasKey(ci => new { ci.CourseId, ci.InstructorProfileId });
+                .HasIndex(ci => new { ci.CourseId, ci.InstructorProfileId })
+                .IsUnique();
 
             builder.Entity<CourseInstructor>()
                 .HasOne(ci => ci.Course)
@@ -79,7 +80,7 @@ namespace Smart_Training_Institute_Portal.Data
                 .HasOne(g => g.Enrollment)
                 .WithMany(e => e.GradeAuditLogs)
                 .HasForeignKey(g => g.EnrollmentId)
-                .OnDelete(DeleteBehavior.Cascade);
+                .OnDelete(DeleteBehavior.Restrict);
                 
             builder.Entity<GradeAuditLog>()
                 .HasOne(g => g.ChangedByUser)
