@@ -85,6 +85,14 @@
                                 <label asp-for="DepartmentId" class="fw-semibold"></label>
                             </div>
                         </div>
+                        <div class="col-md-6">
+                            <div class="form-floating">
+                                <select id="selectedTagId" name="selectedTagId" class="form-select" asp-items="ViewBag.CourseTags">
+                                    <option value="">Select a tag</option>
+                                </select>
+                                <label for="selectedTagId" class="fw-semibold">Course Tag</label>
+                            </div>
+                        </div>
                         <div class="col-md-6 d-flex align-items-end">
                             <div class="form-check form-switch">
                                 <input class="form-check-input" asp-for="IsPublished" />

@@ -53,6 +53,7 @@ namespace Smart_Training_Institute_Portal.Controllers
 
             var course = await ActiveCoursesQuery()
                 .Include(c => c.Department)
+                .Include(c => c.CourseTags)
                 .FirstOrDefaultAsync(m => m.Id == id);
             if (course == null)
             {
@@ -63,9 +64,9 @@ namespace Smart_Training_Institute_Portal.Controllers
         }
 
         // GET: Courses/Create
-        public IActionResult Create()
+        public async Task<IActionResult> Create()
         {
-            ViewData["DepartmentId"] = new SelectList(_context.Departments, "Id", "Name");
+            await PopulateCourseFormSelectionsAsync();
             return View();
         }
 
@@ -74,15 +75,16 @@ namespace Smart_Training_Institute_Portal.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,Title,Code,Description,ImageUrl,CreditHours,Price,Capacity,Level,IsPublished,DepartmentId")] Course course)
+        public async Task<IActionResult> Create([Bind("Id,Title,Code,Description,ImageUrl,CreditHours,Price,Capacity,Level,IsPublished,DepartmentId")] Course course, int? selectedTagId)
         {
             if (ModelState.IsValid)
             {
+                await ApplySelectedTagAsync(course, selectedTagId);
                 _context.Add(course);
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["DepartmentId"] = new SelectList(_context.Departments, "Id", "Name", course.DepartmentId);
+            await PopulateCourseFormSelectionsAsync(course.DepartmentId, selectedTagId);
             return View(course);
         }
 
@@ -95,12 +97,13 @@ namespace Smart_Training_Institute_Portal.Controllers
             }
 
             var course = await ActiveCoursesQuery()
+                .Include(c => c.CourseTags)
                 .FirstOrDefaultAsync(c => c.Id == id);
             if (course == null)
             {
                 return NotFound();
             }
-            ViewData["DepartmentId"] = new SelectList(_context.Departments, "Id", "Name", course.DepartmentId);
+            await PopulateCourseFormSelectionsAsync(course.DepartmentId, course.CourseTags.Select(t => t.Id).FirstOrDefault());
             return View(course);
         }
 
@@ -109,7 +112,7 @@ namespace Smart_Training_Institute_Portal.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Title,Code,Description,ImageUrl,CreditHours,Price,Capacity,Level,IsPublished,DepartmentId,Id")] Course course)
+        public async Task<IActionResult> Edit(int id, [Bind("Title,Code,Description,ImageUrl,CreditHours,Price,Capacity,Level,IsPublished,DepartmentId,Id")] Course course, int? selectedTagId)
         {
             if (id != course.Id)
             {
@@ -120,7 +123,28 @@ namespace Smart_Training_Institute_Portal.Controllers
             {
                 try
                 {
-                    _context.Update(course);
+                    var existingCourse = await ActiveCoursesQuery()
+                        .Include(c => c.CourseTags)
+                        .FirstOrDefaultAsync(c => c.Id == id);
+
+                    if (existingCourse == null)
+                    {
+                        return NotFound();
+                    }
+
+                    existingCourse.Title = course.Title;
+                    existingCourse.Code = course.Code;
+                    existingCourse.Description = course.Description;
+                    existingCourse.ImageUrl = course.ImageUrl;
+                    existingCourse.CreditHours = course.CreditHours;
+                    existingCourse.Price = course.Price;
+                    existingCourse.Capacity = course.Capacity;
+                    existingCourse.Level = course.Level;
+                    existingCourse.IsPublished = course.IsPublished;
+                    existingCourse.DepartmentId = course.DepartmentId;
+                    existingCourse.UpdatedAt = DateTime.UtcNow;
+
+                    await ApplySelectedTagAsync(existingCourse, selectedTagId);
                     await _context.SaveChangesAsync();
                 }
                 catch (DbUpdateConcurrencyException)
@@ -136,7 +160,7 @@ namespace Smart_Training_Institute_Portal.Controllers
                 }
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["DepartmentId"] = new SelectList(_context.Departments, "Id", "Name", course.DepartmentId);
+            await PopulateCourseFormSelectionsAsync(course.DepartmentId, selectedTagId);
             return View(course);
         }
 
@@ -186,6 +210,45 @@ namespace Smart_Training_Institute_Portal.Controllers
         private IQueryable<Course> ActiveCoursesQuery()
         {
             return _context.Courses.Where(c => c.IsDeleted != true);
+        }
+
+        private async Task PopulateCourseFormSelectionsAsync(int? selectedDepartmentId = null, int? selectedTagId = null)
+        {
+            ViewData["DepartmentId"] = new SelectList(
+                await _context.Departments
+                    .Where(d => d.IsDeleted != true)
+                    .OrderBy(d => d.Name)
+                    .ToListAsync(),
+                "Id",
+                "Name",
+                selectedDepartmentId);
+
+            ViewData["CourseTags"] = new SelectList(
+                await _context.CourseTags
+                    .Where(t => t.IsDeleted != true)
+                    .OrderBy(t => t.Name)
+                    .ToListAsync(),
+                "Id",
+                "Name",
+                selectedTagId);
+        }
+
+        private async Task ApplySelectedTagAsync(Course course, int? selectedTagId)
+        {
+            course.CourseTags.Clear();
+
+            if (selectedTagId == null)
+            {
+                return;
+            }
+
+            var tag = await _context.CourseTags
+                .FirstOrDefaultAsync(t => t.Id == selectedTagId && t.IsDeleted != true);
+
+            if (tag != null)
+            {
+                course.CourseTags.Add(tag);
+            }
         }
     }
 }
