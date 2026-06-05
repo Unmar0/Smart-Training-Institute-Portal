@@ -21,25 +21,12 @@ namespace Smart_Training_Institute_Portal.Controllers.Api
         [HttpGet]
         public async Task<ActionResult<IEnumerable<CourseDto>>> GetCourses()
         {
-            var courses = await _context.Courses
+            var courses = await PublishedActiveCoursesQuery()
                 .Include(c => c.Department)
                 .Include(c => c.CourseTags)
                 .Include(c => c.Enrollments)
                 .Include(c => c.CourseInstructors)
-                .Where(c => c.IsPublished == true && c.IsDeleted != true)
-                .Select(c => new CourseDto
-                {
-                    Id = c.Id,
-                    Title = c.Title,
-                    Code = c.Code,
-                    Description = c.Description ?? string.Empty,
-                    CreditHours = c.CreditHours,
-                    Level = c.Level,
-                    Price = c.Price,
-                    DepartmentName = c.Department.Name,
-                    Tags = c.CourseTags.Select(t => t.Name).ToList()
-                })
-
+                .Select(ProjectToCourseDto())
                 .ToListAsync();
 
             return Ok(courses);
@@ -48,22 +35,11 @@ namespace Smart_Training_Institute_Portal.Controllers.Api
         [HttpGet("{id}")]
         public async Task<ActionResult<CourseDto>> GetCourse(int id)
         {
-            var course = await _context.Courses
+            var course = await ActiveCoursesQuery()
                 .Include(c => c.Department)
                 .Include(c => c.CourseTags)
-                .Where(c => c.Id == id && c.IsDeleted != true)
-                .Select(c => new CourseDto
-                {
-                    Id = c.Id,
-                    Title = c.Title,
-                    Code = c.Code,
-                    Description = c.Description ?? string.Empty,
-                    CreditHours = c.CreditHours,
-                    Level = c.Level,
-                    Price = c.Price,
-                    DepartmentName = c.Department.Name,
-                    Tags = c.CourseTags.Select(t => t.Name).ToList()
-                })
+                .Where(c => c.Id == id)
+                .Select(ProjectToCourseDto())
                 .FirstOrDefaultAsync();
 
             if (course == null)
@@ -134,9 +110,9 @@ namespace Smart_Training_Institute_Portal.Controllers.Api
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> UpdateCourse(int id, CourseCreateUpdateDto dto)
         {
-            var course = await _context.Courses
+            var course = await ActiveCoursesQuery()
                 .Include(c => c.CourseTags)
-                .FirstOrDefaultAsync(c => c.Id == id && c.IsDeleted != true);
+                .FirstOrDefaultAsync(c => c.Id == id);
 
             if (course == null)
             {
@@ -194,8 +170,8 @@ namespace Smart_Training_Institute_Portal.Controllers.Api
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> DeleteCourse(int id)
         {
-            var course = await _context.Courses
-                .FirstOrDefaultAsync(c => c.Id == id && c.IsDeleted != true);
+            var course = await ActiveCoursesQuery()
+                .FirstOrDefaultAsync(c => c.Id == id);
 
             if (course == null)
             {
@@ -213,23 +189,38 @@ namespace Smart_Training_Institute_Portal.Controllers.Api
 
         private async Task<CourseDto?> BuildCourseDto(int id)
         {
-            return await _context.Courses
+            return await ActiveCoursesQuery()
                 .Include(c => c.Department)
                 .Include(c => c.CourseTags)
-                .Where(c => c.Id == id && c.IsDeleted != true)
-                .Select(c => new CourseDto
-                {
-                    Id = c.Id,
-                    Title = c.Title,
-                    Code = c.Code,
-                    Description = c.Description ?? string.Empty,
-                    CreditHours = c.CreditHours,
-                    Level = c.Level,
-                    Price = c.Price,
-                    DepartmentName = c.Department.Name,
-                    Tags = c.CourseTags.Select(t => t.Name).ToList()
-                })
+                .Where(c => c.Id == id)
+                .Select(ProjectToCourseDto())
                 .FirstOrDefaultAsync();
+        }
+
+        private IQueryable<Course> ActiveCoursesQuery()
+        {
+            return _context.Courses.Where(c => c.IsDeleted != true);
+        }
+
+        private IQueryable<Course> PublishedActiveCoursesQuery()
+        {
+            return ActiveCoursesQuery().Where(c => c.IsPublished);
+        }
+
+        private static System.Linq.Expressions.Expression<Func<Course, CourseDto>> ProjectToCourseDto()
+        {
+            return c => new CourseDto
+            {
+                Id = c.Id,
+                Title = c.Title,
+                Code = c.Code,
+                Description = c.Description ?? string.Empty,
+                CreditHours = c.CreditHours,
+                Level = c.Level,
+                Price = c.Price,
+                DepartmentName = c.Department.Name,
+                Tags = c.CourseTags.Select(t => t.Name).ToList()
+            };
         }
     }
 }

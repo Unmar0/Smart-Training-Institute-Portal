@@ -11,7 +11,7 @@
     </div>
     <div class="sti-action-bar">
         <a asp-action="Index" class="btn btn-danger">
-            <i class="bi bi-arrow-left me-1"></i> Back to List
+            Back to List
         </a>
     </div>
 </div>
@@ -22,14 +22,15 @@
             <div class="card-body">
                 <form asp-action="Edit">
                     <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+                    <input type="hidden" asp-for="Id" />
                     <input type="hidden" asp-for="CourseId" />
                     <input type="hidden" asp-for="InstructorProfileId" />
                     <div class="d-flex justify-content-end gap-2 mt-4">
                         <a asp-action="Index" class="btn btn-danger">
-                            <i class="bi bi-arrow-left me-1"></i> Cancel
+                            Cancel
                         </a>
                         <button type="submit" class="btn btn-primary">
-                            <i class="bi bi-check-circle me-1"></i> Save
+                            Save
                         </button>
                     </div>
                 </form>

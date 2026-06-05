@@ -38,7 +38,8 @@ namespace Smart_Training_Institute_Portal.Controllers
         // GET: Courses
         public async Task<IActionResult> Index()
         {
-            var applicationDbContext = _context.Courses.Include(c => c.Department);
+            var applicationDbContext = ActiveCoursesQuery()
+                .Include(c => c.Department);
             return View(await applicationDbContext.ToListAsync());
         }
 
@@ -50,7 +51,7 @@ namespace Smart_Training_Institute_Portal.Controllers
                 return NotFound();
             }
 
-            var course = await _context.Courses
+            var course = await ActiveCoursesQuery()
                 .Include(c => c.Department)
                 .FirstOrDefaultAsync(m => m.Id == id);
             if (course == null)
@@ -75,7 +76,6 @@ namespace Smart_Training_Institute_Portal.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("Id,Title,Code,Description,ImageUrl,CreditHours,Price,Capacity,Level,IsPublished,DepartmentId")] Course course)
         {
-            
             if (ModelState.IsValid)
             {
                 _context.Add(course);
@@ -94,7 +94,8 @@ namespace Smart_Training_Institute_Portal.Controllers
                 return NotFound();
             }
 
-            var course = await _context.Courses.FindAsync(id);
+            var course = await ActiveCoursesQuery()
+                .FirstOrDefaultAsync(c => c.Id == id);
             if (course == null)
             {
                 return NotFound();
@@ -147,7 +148,7 @@ namespace Smart_Training_Institute_Portal.Controllers
                 return NotFound();
             }
 
-            var course = await _context.Courses
+            var course = await ActiveCoursesQuery()
                 .Include(c => c.Department)
                 .FirstOrDefaultAsync(m => m.Id == id);
             if (course == null)
@@ -163,13 +164,15 @@ namespace Smart_Training_Institute_Portal.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            var course = await _context.Courses.FindAsync(id);
-            if (course != null)
+            var course = await ActiveCoursesQuery()
+                .FirstOrDefaultAsync(c => c.Id == id);
+            if (course == null)
             {
-                course.IsDeleted = true;
-                course.DeletedAt = DateTime.UtcNow;
-                _context.Update(course);
+                return RedirectToAction(nameof(Index));
             }
+
+            course.IsDeleted = true;
+            course.DeletedAt = DateTime.UtcNow;
 
             await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
@@ -177,7 +180,12 @@ namespace Smart_Training_Institute_Portal.Controllers
 
         private bool CourseExists(int id)
         {
-            return _context.Courses.Any(e => e.Id == id);
+            return ActiveCoursesQuery().Any(e => e.Id == id);
+        }
+
+        private IQueryable<Course> ActiveCoursesQuery()
+        {
+            return _context.Courses.Where(c => c.IsDeleted != true);
         }
     }
 }

@@ -35,7 +35,7 @@ namespace Smart_Training_Institute_Portal.Controllers
             var courseInstructor = await _context.CourseInstructors
                 .Include(c => c.Course)
                 .Include(c => c.InstructorProfile)
-                .FirstOrDefaultAsync(m => m.CourseId == id);
+                .FirstOrDefaultAsync(m => m.Id == id);
             if (courseInstructor == null)
             {
                 return NotFound();
@@ -93,9 +93,9 @@ namespace Smart_Training_Institute_Portal.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("CourseId,InstructorProfileId")] CourseInstructor courseInstructor)
+        public async Task<IActionResult> Edit(int id, [Bind("Id,CourseId,InstructorProfileId")] CourseInstructor courseInstructor)
         {
-            if (id != courseInstructor.CourseId)
+            if (id != courseInstructor.Id)
             {
                 return NotFound();
             }
@@ -109,7 +109,7 @@ namespace Smart_Training_Institute_Portal.Controllers
                 }
                 catch (DbUpdateConcurrencyException)
                 {
-                    if (!CourseInstructorExists(courseInstructor.CourseId))
+                    if (!CourseInstructorExists(courseInstructor.Id))
                     {
                         return NotFound();
                     }
@@ -136,7 +136,7 @@ namespace Smart_Training_Institute_Portal.Controllers
             var courseInstructor = await _context.CourseInstructors
                 .Include(c => c.Course)
                 .Include(c => c.InstructorProfile)
-                .FirstOrDefaultAsync(m => m.CourseId == id);
+                .FirstOrDefaultAsync(m => m.Id == id);
             if (courseInstructor == null)
             {
                 return NotFound();
@@ -162,7 +162,7 @@ namespace Smart_Training_Institute_Portal.Controllers
 
         private bool CourseInstructorExists(int id)
         {
-            return _context.CourseInstructors.Any(e => e.CourseId == id);
+            return _context.CourseInstructors.Any(e => e.Id == id);
         }
     }
 }

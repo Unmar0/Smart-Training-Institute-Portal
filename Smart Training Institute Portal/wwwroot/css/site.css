@@ -66,14 +66,16 @@ main {
   transition: all 0.2s ease-in-out;
 }
 
-.btn i,
-.page-header i {
-  color: var(--sti-primary);
+.btn {
+  transition: background-color 0.2s ease-in-out, border-color 0.2s ease-in-out, color 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
 }
 
-.btn-primary i,
-.btn-danger i {
-  color: #fff;
+.btn i {
+  color: inherit;
+}
+
+.page-header i {
+  color: var(--sti-primary);
 }
 
 .nav-link:hover,
@@ -92,6 +94,7 @@ main {
 .btn-primary:focus {
   background-color: var(--sti-primary-dark);
   border-color: var(--sti-primary-dark);
+  color: #fff;
 }
 
 .btn-outline-primary {
@@ -128,6 +131,10 @@ main {
   background-color: var(--sti-danger);
   border-color: var(--sti-danger);
   color: #fff;
+}
+
+.btn-group > .btn {
+  transition: background-color 0.2s ease-in-out, border-color 0.2s ease-in-out, color 0.2s ease-in-out;
 }
 
 .card,
