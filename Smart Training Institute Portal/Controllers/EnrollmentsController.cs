@@ -1,14 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using Smart_Training_Institute_Portal.Data;
 using Smart_Training_Institute_Portal.Models;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Identity;
 
 namespace Smart_Training_Institute_Portal.Controllers
 {
@@ -144,7 +140,7 @@ namespace Smart_Training_Institute_Portal.Controllers
         [Authorize(Roles = "Admin,Instructor")]
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("EnrollmentDate,Mark,Grade,Status,StudentProfileId,CourseId,Id,CreatedAt,UpdatedAt,DeletedAt,IsDeleted")] Enrollment enrollment)
+        public async Task<IActionResult> Create([Bind("EnrollmentDate,Mark,Grade,Status,StudentProfileId,CourseId,Id")] Enrollment enrollment)
         {
             if (ModelState.IsValid)
             {
@@ -183,7 +179,7 @@ namespace Smart_Training_Institute_Portal.Controllers
         [Authorize(Roles = "Admin,Instructor")]
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("EnrollmentDate,Mark,Grade,Status,StudentProfileId,CourseId,Id,CreatedAt,UpdatedAt,DeletedAt,IsDeleted")] Enrollment enrollment)
+        public async Task<IActionResult> Edit(int id, [Bind("EnrollmentDate,Mark,Grade,Status,StudentProfileId,CourseId,Id")] Enrollment enrollment)
         {
             if (id != enrollment.Id)
             {

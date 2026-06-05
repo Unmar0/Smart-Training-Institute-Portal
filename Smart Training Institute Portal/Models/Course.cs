@@ -13,14 +13,12 @@ namespace Smart_Training_Institute_Portal.Models
         [StringLength(20)]
         public string Code { get; set; }
 
-        [StringLength(1000)] 
+        [StringLength(1000)]
         public string? Description { get; set; }
 
-
-        [StringLength(200)]
         public string? ImageUrl { get; set; }
 
-        [Range (1, 100)]
+        [Range(1, 100)]
         public int CreditHours { get; set; }
 
         public decimal? Price { get; set; }
@@ -36,7 +34,7 @@ namespace Smart_Training_Institute_Portal.Models
 
 
         public int DepartmentId { get; set; }
-        public Department Department { get; set; }
+        public Department? Department { get; set; }
         public ICollection<CourseInstructor> CourseInstructors { get; set; } = new List<CourseInstructor>();
 
         public ICollection<Enrollment> Enrollments { get; set; } = new List<Enrollment>();

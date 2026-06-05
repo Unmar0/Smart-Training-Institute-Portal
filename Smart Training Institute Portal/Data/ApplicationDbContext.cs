@@ -66,12 +66,12 @@ namespace Smart_Training_Institute_Portal.Data
             builder.Entity<Course>()
                 .Property(c => c.Price)
                 .HasColumnType("decimal(18,2)");
-                
+
             // Configure GradeAuditLog Delete Behavior
             builder.Entity<GradeAuditLog>()
                 .Property(g => g.OldMark)
                 .HasColumnType("decimal(5,2)");
-                
+
             builder.Entity<GradeAuditLog>()
                 .Property(g => g.NewMark)
                 .HasColumnType("decimal(5,2)");
@@ -81,13 +81,13 @@ namespace Smart_Training_Institute_Portal.Data
                 .WithMany(e => e.GradeAuditLogs)
                 .HasForeignKey(g => g.EnrollmentId)
                 .OnDelete(DeleteBehavior.Restrict);
-                
+
             builder.Entity<GradeAuditLog>()
                 .HasOne(g => g.ChangedByUser)
                 .WithMany(u => u.GradeAuditLogs)
                 .HasForeignKey(g => g.ChangedBy)
                 .OnDelete(DeleteBehavior.Restrict);
-                
+
             // Setup Departments
             builder.Entity<Course>()
                 .HasOne(c => c.Department)

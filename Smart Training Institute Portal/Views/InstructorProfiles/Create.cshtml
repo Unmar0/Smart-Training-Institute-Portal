@@ -1,80 +1,90 @@
 ﻿@model Smart_Training_Institute_Portal.Models.InstructorProfile
 
 @{
-    ViewData["Title"] = "Create";
+    ViewData["Title"] = "Create Instructor";
 }
 
-<h1>Create</h1>
-
-<h4>InstructorProfile</h4>
-<hr />
-<div class="row">
-    <div class="col-md-4">
-        <form asp-action="Create">
-            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-            <div class="form-group">
-                <label asp-for="InstructorNumber" class="control-label"></label>
-                <input asp-for="InstructorNumber" class="form-control" />
-                <span asp-validation-for="InstructorNumber" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="FullName" class="control-label"></label>
-                <input asp-for="FullName" class="form-control" />
-                <span asp-validation-for="FullName" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="Specialization" class="control-label"></label>
-                <input asp-for="Specialization" class="form-control" />
-                <span asp-validation-for="Specialization" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="Bio" class="control-label"></label>
-                <input asp-for="Bio" class="form-control" />
-                <span asp-validation-for="Bio" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="ImageUrl" class="control-label"></label>
-                <input asp-for="ImageUrl" class="form-control" />
-                <span asp-validation-for="ImageUrl" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="OfficeNumber" class="control-label"></label>
-                <input asp-for="OfficeNumber" class="form-control" />
-                <span asp-validation-for="OfficeNumber" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="ApplicationUserId" class="control-label"></label>
-                <select asp-for="ApplicationUserId" class ="form-control" asp-items="ViewBag.ApplicationUserId"></select>
-            </div>
-            <div class="form-group">
-                <label asp-for="CreatedAt" class="control-label"></label>
-                <input asp-for="CreatedAt" class="form-control" />
-                <span asp-validation-for="CreatedAt" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="UpdatedAt" class="control-label"></label>
-                <input asp-for="UpdatedAt" class="form-control" />
-                <span asp-validation-for="UpdatedAt" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="DeletedAt" class="control-label"></label>
-                <input asp-for="DeletedAt" class="form-control" />
-                <span asp-validation-for="DeletedAt" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="IsDeleted" class="control-label"></label>
-                <input asp-for="IsDeleted" class="form-control" />
-                <span asp-validation-for="IsDeleted" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <input type="submit" value="Create" class="btn btn-primary" />
-            </div>
-        </form>
+<div class="page-header d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3">
+    <div>
+        <h1 class="page-title"><i class="bi bi-person-plus me-2 text-danger"></i>Create Instructor</h1>
+        <p class="page-subtitle">Add instructor details, specialization, and office info.</p>
+    </div>
+    <div class="sti-action-bar">
+        <a asp-action="Index" class="btn btn-danger">
+            <i class="bi bi-arrow-left me-1"></i> Back to List
+        </a>
     </div>
 </div>
 
-<div>
-    <a asp-action="Index">Back to List</a>
+<div class="row justify-content-center">
+    <div class="col-lg-10">
+        <div class="card sti-card">
+            <div class="card-body">
+                <form asp-action="Create">
+                    <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <div class="form-floating">
+                                <input asp-for="InstructorNumber" class="form-control" placeholder="Instructor Number" />
+                                <label asp-for="InstructorNumber" class="fw-semibold"></label>
+                            </div>
+                            <span asp-validation-for="InstructorNumber" class="text-danger"></span>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-floating">
+                                <input asp-for="FullName" class="form-control" placeholder="Full Name" />
+                                <label asp-for="FullName" class="fw-semibold"></label>
+                            </div>
+                            <span asp-validation-for="FullName" class="text-danger"></span>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-floating">
+                                <input asp-for="Specialization" class="form-control" placeholder="Specialization" />
+                                <label asp-for="Specialization" class="fw-semibold"></label>
+                            </div>
+                            <span asp-validation-for="Specialization" class="text-danger"></span>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-floating">
+                                <input asp-for="OfficeNumber" class="form-control" placeholder="Office Number" />
+                                <label asp-for="OfficeNumber" class="fw-semibold"></label>
+                            </div>
+                            <span asp-validation-for="OfficeNumber" class="text-danger"></span>
+                        </div>
+                        <div class="col-12">
+                            <div class="form-floating">
+                                <input asp-for="Bio" class="form-control" placeholder="Bio" />
+                                <label asp-for="Bio" class="fw-semibold"></label>
+                            </div>
+                            <span asp-validation-for="Bio" class="text-danger"></span>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-floating">
+                                <input asp-for="ImageUrl" class="form-control" placeholder="Image Url" />
+                                <label asp-for="ImageUrl" class="fw-semibold"></label>
+                            </div>
+                            <span asp-validation-for="ImageUrl" class="text-danger"></span>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-floating">
+                                <select asp-for="ApplicationUserId" class="form-select" asp-items="ViewBag.ApplicationUserId"></select>
+                                <label asp-for="ApplicationUserId" class="fw-semibold"></label>
+                            </div>
+                            <span asp-validation-for="ApplicationUserId" class="text-danger"></span>
+                        </div>
+                    </div>
+                    <div class="d-flex justify-content-end gap-2 mt-4">
+                        <a asp-action="Index" class="btn btn-danger">
+                            <i class="bi bi-arrow-left me-1"></i> Cancel
+                        </a>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-plus-circle me-1"></i> Create
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
 </div>
 
 @section Scripts {

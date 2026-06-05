@@ -1,13 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using Smart_Training_Institute_Portal.Data;
 using Smart_Training_Institute_Portal.Models;
-using Microsoft.AspNetCore.Authorization;
 
 namespace Smart_Training_Institute_Portal.Controllers
 {
@@ -77,8 +73,9 @@ namespace Smart_Training_Institute_Portal.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Title,Code,Description,ImageUrl,CreditHours,Price,Capacity,Level,IsPublished,DepartmentId,Id,CreatedAt,UpdatedAt,DeletedAt,IsDeleted")] Course course)
+        public async Task<IActionResult> Create([Bind("Id,Title,Code,Description,ImageUrl,CreditHours,Price,Capacity,Level,IsPublished,DepartmentId")] Course course)
         {
+            
             if (ModelState.IsValid)
             {
                 _context.Add(course);
@@ -111,7 +108,7 @@ namespace Smart_Training_Institute_Portal.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Title,Code,Description,ImageUrl,CreditHours,Price,Capacity,Level,IsPublished,DepartmentId,Id,CreatedAt,UpdatedAt,DeletedAt,IsDeleted")] Course course)
+        public async Task<IActionResult> Edit(int id, [Bind("Title,Code,Description,ImageUrl,CreditHours,Price,Capacity,Level,IsPublished,DepartmentId,Id")] Course course)
         {
             if (id != course.Id)
             {

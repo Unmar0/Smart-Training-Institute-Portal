@@ -1,28 +1,41 @@
 ﻿@model Smart_Training_Institute_Portal.Models.CourseInstructor
 
 @{
-    ViewData["Title"] = "Edit";
+    ViewData["Title"] = "Edit Assignment";
 }
 
-<h1>Edit</h1>
-
-<h4>CourseInstructor</h4>
-<hr />
-<div class="row">
-    <div class="col-md-4">
-        <form asp-action="Edit">
-            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-            <input type="hidden" asp-for="CourseId" />
-            <input type="hidden" asp-for="InstructorProfileId" />
-            <div class="form-group">
-                <input type="submit" value="Save" class="btn btn-primary" />
-            </div>
-        </form>
+<div class="page-header d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3">
+    <div>
+        <h1 class="page-title"><i class="bi bi-pencil-square me-2 text-danger"></i>Edit Assignment</h1>
+        <p class="page-subtitle">Update the course instructor assignment.</p>
+    </div>
+    <div class="sti-action-bar">
+        <a asp-action="Index" class="btn btn-danger">
+            <i class="bi bi-arrow-left me-1"></i> Back to List
+        </a>
     </div>
 </div>
 
-<div>
-    <a asp-action="Index">Back to List</a>
+<div class="row justify-content-center">
+    <div class="col-lg-10">
+        <div class="card sti-card">
+            <div class="card-body">
+                <form asp-action="Edit">
+                    <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+                    <input type="hidden" asp-for="CourseId" />
+                    <input type="hidden" asp-for="InstructorProfileId" />
+                    <div class="d-flex justify-content-end gap-2 mt-4">
+                        <a asp-action="Index" class="btn btn-danger">
+                            <i class="bi bi-arrow-left me-1"></i> Cancel
+                        </a>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-check-circle me-1"></i> Save
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
 </div>
 
 @section Scripts {

@@ -1,13 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using Smart_Training_Institute_Portal.Data;
 using Smart_Training_Institute_Portal.Models;
-using Microsoft.AspNetCore.Authorization;
 
 namespace Smart_Training_Institute_Portal.Controllers
 {
@@ -59,7 +55,7 @@ namespace Smart_Training_Institute_Portal.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("FullName,StudentNumber,ImageUrl,DateofBirth,ApplicationUserId,Id,CreatedAt,UpdatedAt,DeletedAt,IsDeleted")] StudentProfile studentProfile)
+        public async Task<IActionResult> Create([Bind("FullName,StudentNumber,ImageUrl,DateofBirth,ApplicationUserId,Id")] StudentProfile studentProfile)
         {
             if (ModelState.IsValid)
             {
@@ -94,7 +90,7 @@ namespace Smart_Training_Institute_Portal.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("FullName,StudentNumber,ImageUrl,DateofBirth,ApplicationUserId,Id,CreatedAt,UpdatedAt,DeletedAt,IsDeleted")] StudentProfile studentProfile)
+        public async Task<IActionResult> Edit(int id, [Bind("FullName,StudentNumber,ImageUrl,DateofBirth,ApplicationUserId,Id")] StudentProfile studentProfile)
         {
             if (id != studentProfile.Id)
             {

@@ -1,13 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using Smart_Training_Institute_Portal.Data;
 using Smart_Training_Institute_Portal.Models;
-using Microsoft.AspNetCore.Authorization;
 
 namespace Smart_Training_Institute_Portal.Controllers
 {
@@ -59,7 +55,7 @@ namespace Smart_Training_Institute_Portal.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("InstructorNumber,FullName,Specialization,Bio,ImageUrl,OfficeNumber,ApplicationUserId,Id,CreatedAt,UpdatedAt,DeletedAt,IsDeleted")] InstructorProfile instructorProfile)
+        public async Task<IActionResult> Create([Bind("InstructorNumber,FullName,Specialization,Bio,ImageUrl,OfficeNumber,ApplicationUserId,Id")] InstructorProfile instructorProfile)
         {
             if (ModelState.IsValid)
             {
@@ -94,7 +90,7 @@ namespace Smart_Training_Institute_Portal.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("InstructorNumber,FullName,Specialization,Bio,ImageUrl,OfficeNumber,ApplicationUserId,Id,CreatedAt,UpdatedAt,DeletedAt,IsDeleted")] InstructorProfile instructorProfile)
+        public async Task<IActionResult> Edit(int id, [Bind("InstructorNumber,FullName,Specialization,Bio,ImageUrl,OfficeNumber,ApplicationUserId,Id")] InstructorProfile instructorProfile)
         {
             if (id != instructorProfile.Id)
             {

@@ -1,8 +1,8 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Smart_Training_Institute_Portal.Data;
 using Smart_Training_Institute_Portal.DTOs;
-using Microsoft.AspNetCore.Authorization;
 using Smart_Training_Institute_Portal.Models;
 
 namespace Smart_Training_Institute_Portal.Controllers.Api
@@ -24,7 +24,9 @@ namespace Smart_Training_Institute_Portal.Controllers.Api
             var courses = await _context.Courses
                 .Include(c => c.Department)
                 .Include(c => c.CourseTags)
-                .Where(c => c.IsPublished && c.IsDeleted != true)
+                .Include(c => c.Enrollments)
+                .Include(c => c.CourseInstructors)
+                .Where(c => c.IsPublished == true && c.IsDeleted != true)
                 .Select(c => new CourseDto
                 {
                     Id = c.Id,
@@ -37,6 +39,7 @@ namespace Smart_Training_Institute_Portal.Controllers.Api
                     DepartmentName = c.Department.Name,
                     Tags = c.CourseTags.Select(t => t.Name).ToList()
                 })
+
                 .ToListAsync();
 
             return Ok(courses);
