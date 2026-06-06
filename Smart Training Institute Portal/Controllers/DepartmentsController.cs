@@ -19,7 +19,7 @@ namespace Smart_Training_Institute_Portal.Controllers
         // GET: Departments
         public async Task<IActionResult> Index()
         {
-            return View(await _context.Departments.ToListAsync());
+            return View(await ActiveDepartmentsQuery().ToListAsync());
         }
 
         // GET: Departments/Details/5
@@ -30,7 +30,7 @@ namespace Smart_Training_Institute_Portal.Controllers
                 return NotFound();
             }
 
-            var department = await _context.Departments
+            var department = await ActiveDepartmentsQuery()
                 .FirstOrDefaultAsync(m => m.Id == id);
             if (department == null)
             {
@@ -70,7 +70,7 @@ namespace Smart_Training_Institute_Portal.Controllers
                 return NotFound();
             }
 
-            var department = await _context.Departments.FindAsync(id);
+            var department = await ActiveDepartmentsQuery().FirstOrDefaultAsync(d => d.Id == id);
             if (department == null)
             {
                 return NotFound();
@@ -94,7 +94,17 @@ namespace Smart_Training_Institute_Portal.Controllers
             {
                 try
                 {
-                    _context.Update(department);
+                    var existingDepartment = await ActiveDepartmentsQuery()
+                        .FirstOrDefaultAsync(d => d.Id == id);
+
+                    if (existingDepartment == null)
+                    {
+                        return NotFound();
+                    }
+
+                    existingDepartment.Name = department.Name;
+                    existingDepartment.UpdatedAt = DateTime.UtcNow;
+
                     await _context.SaveChangesAsync();
                 }
                 catch (DbUpdateConcurrencyException)
@@ -121,7 +131,7 @@ namespace Smart_Training_Institute_Portal.Controllers
                 return NotFound();
             }
 
-            var department = await _context.Departments
+            var department = await ActiveDepartmentsQuery()
                 .FirstOrDefaultAsync(m => m.Id == id);
             if (department == null)
             {
@@ -136,11 +146,15 @@ namespace Smart_Training_Institute_Portal.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            var department = await _context.Departments.FindAsync(id);
-            if (department != null)
+            var department = await ActiveDepartmentsQuery()
+                .FirstOrDefaultAsync(d => d.Id == id);
+            if (department == null)
             {
-                _context.Departments.Remove(department);
+                return RedirectToAction(nameof(Index));
             }
+
+            department.IsDeleted = true;
+            department.DeletedAt = DateTime.UtcNow;
 
             await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
@@ -148,7 +162,14 @@ namespace Smart_Training_Institute_Portal.Controllers
 
         private bool DepartmentExists(int id)
         {
-            return _context.Departments.Any(e => e.Id == id);
+            return ActiveDepartmentsQuery().Any(e => e.Id == id);
+        }
+
+        private IQueryable<Department> ActiveDepartmentsQuery()
+        {
+            return _context.Departments
+                .Where(d => d.IsDeleted != true)
+                .OrderBy(d => d.Name);
         }
     }
 }

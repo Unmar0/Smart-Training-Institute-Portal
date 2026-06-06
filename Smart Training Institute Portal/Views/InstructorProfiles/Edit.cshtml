@@ -67,7 +67,9 @@
                         </div>
                         <div class="col-md-6">
                             <div class="form-floating">
-                                <select asp-for="ApplicationUserId" class="form-select" asp-items="ViewBag.ApplicationUserId"></select>
+                                <select asp-for="ApplicationUserId" class="form-select" asp-items="ViewBag.ApplicationUserId">
+                                    <option value="">Select a user</option>
+                                </select>
                                 <label asp-for="ApplicationUserId" class="fw-semibold"></label>
                             </div>
                             <span asp-validation-for="ApplicationUserId" class="text-danger"></span>

@@ -20,7 +20,9 @@ namespace Smart_Training_Institute_Portal.Controllers
         // GET: CourseInstructors
         public async Task<IActionResult> Index()
         {
-            var applicationDbContext = _context.CourseInstructors.Include(c => c.Course).Include(c => c.InstructorProfile);
+            var applicationDbContext = ActiveCourseInstructorsQuery()
+                .Include(c => c.Course)
+                .Include(c => c.InstructorProfile);
             return View(await applicationDbContext.ToListAsync());
         }
 
@@ -32,7 +34,7 @@ namespace Smart_Training_Institute_Portal.Controllers
                 return NotFound();
             }
 
-            var courseInstructor = await _context.CourseInstructors
+            var courseInstructor = await ActiveCourseInstructorsQuery()
                 .Include(c => c.Course)
                 .Include(c => c.InstructorProfile)
                 .FirstOrDefaultAsync(m => m.Id == id);
@@ -47,8 +49,8 @@ namespace Smart_Training_Institute_Portal.Controllers
         // GET: CourseInstructors/Create
         public IActionResult Create()
         {
-            ViewData["CourseId"] = new SelectList(_context.Courses, "Id", "Title");
-            ViewData["InstructorProfileId"] = new SelectList(_context.InstructorProfiles, "Id", "FullName");
+            ViewData["CourseId"] = new SelectList(_context.Courses.Where(c => c.IsDeleted != true), "Id", "Title");
+            ViewData["InstructorProfileId"] = new SelectList(_context.InstructorProfiles.Where(i => i.IsDeleted != true), "Id", "FullName");
             return View();
         }
 
@@ -65,8 +67,8 @@ namespace Smart_Training_Institute_Portal.Controllers
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["CourseId"] = new SelectList(_context.Courses, "Id", "Code", courseInstructor.CourseId);
-            ViewData["InstructorProfileId"] = new SelectList(_context.InstructorProfiles, "Id", "FullName", courseInstructor.InstructorProfileId);
+            ViewData["CourseId"] = new SelectList(_context.Courses.Where(c => c.IsDeleted != true), "Id", "Code", courseInstructor.CourseId);
+            ViewData["InstructorProfileId"] = new SelectList(_context.InstructorProfiles.Where(i => i.IsDeleted != true), "Id", "FullName", courseInstructor.InstructorProfileId);
             return View(courseInstructor);
         }
 
@@ -78,13 +80,13 @@ namespace Smart_Training_Institute_Portal.Controllers
                 return NotFound();
             }
 
-            var courseInstructor = await _context.CourseInstructors.FindAsync(id);
+            var courseInstructor = await ActiveCourseInstructorsQuery().FirstOrDefaultAsync(c => c.Id == id);
             if (courseInstructor == null)
             {
                 return NotFound();
             }
-            ViewData["CourseId"] = new SelectList(_context.Courses, "Id", "Code", courseInstructor.CourseId);
-            ViewData["InstructorProfileId"] = new SelectList(_context.InstructorProfiles, "Id", "FullName", courseInstructor.InstructorProfileId);
+            ViewData["CourseId"] = new SelectList(_context.Courses.Where(c => c.IsDeleted != true), "Id", "Code", courseInstructor.CourseId);
+            ViewData["InstructorProfileId"] = new SelectList(_context.InstructorProfiles.Where(i => i.IsDeleted != true), "Id", "FullName", courseInstructor.InstructorProfileId);
             return View(courseInstructor);
         }
 
@@ -104,7 +106,18 @@ namespace Smart_Training_Institute_Portal.Controllers
             {
                 try
                 {
-                    _context.Update(courseInstructor);
+                    var existingCourseInstructor = await ActiveCourseInstructorsQuery()
+                        .FirstOrDefaultAsync(c => c.Id == id);
+
+                    if (existingCourseInstructor == null)
+                    {
+                        return NotFound();
+                    }
+
+                    existingCourseInstructor.CourseId = courseInstructor.CourseId;
+                    existingCourseInstructor.InstructorProfileId = courseInstructor.InstructorProfileId;
+                    existingCourseInstructor.UpdatedAt = DateTime.UtcNow;
+
                     await _context.SaveChangesAsync();
                 }
                 catch (DbUpdateConcurrencyException)
@@ -120,8 +133,8 @@ namespace Smart_Training_Institute_Portal.Controllers
                 }
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["CourseId"] = new SelectList(_context.Courses, "Id", "Code", courseInstructor.CourseId);
-            ViewData["InstructorProfileId"] = new SelectList(_context.InstructorProfiles, "Id", "FullName", courseInstructor.InstructorProfileId);
+            ViewData["CourseId"] = new SelectList(_context.Courses.Where(c => c.IsDeleted != true), "Id", "Code", courseInstructor.CourseId);
+            ViewData["InstructorProfileId"] = new SelectList(_context.InstructorProfiles.Where(i => i.IsDeleted != true), "Id", "FullName", courseInstructor.InstructorProfileId);
             return View(courseInstructor);
         }
 
@@ -133,7 +146,7 @@ namespace Smart_Training_Institute_Portal.Controllers
                 return NotFound();
             }
 
-            var courseInstructor = await _context.CourseInstructors
+            var courseInstructor = await ActiveCourseInstructorsQuery()
                 .Include(c => c.Course)
                 .Include(c => c.InstructorProfile)
                 .FirstOrDefaultAsync(m => m.Id == id);
@@ -150,11 +163,15 @@ namespace Smart_Training_Institute_Portal.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            var courseInstructor = await _context.CourseInstructors.FindAsync(id);
-            if (courseInstructor != null)
+            var courseInstructor = await ActiveCourseInstructorsQuery()
+                .FirstOrDefaultAsync(c => c.Id == id);
+            if (courseInstructor == null)
             {
-                _context.CourseInstructors.Remove(courseInstructor);
+                return RedirectToAction(nameof(Index));
             }
+
+            courseInstructor.IsDeleted = true;
+            courseInstructor.DeletedAt = DateTime.UtcNow;
 
             await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
@@ -162,7 +179,12 @@ namespace Smart_Training_Institute_Portal.Controllers
 
         private bool CourseInstructorExists(int id)
         {
-            return _context.CourseInstructors.Any(e => e.Id == id);
+            return ActiveCourseInstructorsQuery().Any(e => e.Id == id);
+        }
+
+        private IQueryable<CourseInstructor> ActiveCourseInstructorsQuery()
+        {
+            return _context.CourseInstructors.Where(c => c.IsDeleted != true);
         }
     }
 }

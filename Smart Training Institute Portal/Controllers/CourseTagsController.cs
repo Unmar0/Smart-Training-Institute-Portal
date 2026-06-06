@@ -19,7 +19,7 @@ namespace Smart_Training_Institute_Portal.Controllers
         // GET: CourseTags
         public async Task<IActionResult> Index()
         {
-            return View(await _context.CourseTags.ToListAsync());
+            return View(await ActiveCourseTagsQuery().ToListAsync());
         }
 
         // GET: CourseTags/Details/5
@@ -30,7 +30,7 @@ namespace Smart_Training_Institute_Portal.Controllers
                 return NotFound();
             }
 
-            var courseTag = await _context.CourseTags
+            var courseTag = await ActiveCourseTagsQuery()
                 .FirstOrDefaultAsync(m => m.Id == id);
             if (courseTag == null)
             {
@@ -71,7 +71,7 @@ namespace Smart_Training_Institute_Portal.Controllers
                 return NotFound();
             }
 
-            var courseTag = await _context.CourseTags.FindAsync(id);
+            var courseTag = await ActiveCourseTagsQuery().FirstOrDefaultAsync(t => t.Id == id);
             if (courseTag == null)
             {
                 return NotFound();
@@ -95,7 +95,17 @@ namespace Smart_Training_Institute_Portal.Controllers
             {
                 try
                 {
-                    _context.Update(courseTag);
+                    var existingCourseTag = await ActiveCourseTagsQuery()
+                        .FirstOrDefaultAsync(t => t.Id == id);
+
+                    if (existingCourseTag == null)
+                    {
+                        return NotFound();
+                    }
+
+                    existingCourseTag.Name = courseTag.Name;
+                    existingCourseTag.UpdatedAt = DateTime.UtcNow;
+
                     await _context.SaveChangesAsync();
                     TempData["Success"] = "Course tag updated successfully.";
                 }
@@ -123,7 +133,7 @@ namespace Smart_Training_Institute_Portal.Controllers
                 return NotFound();
             }
 
-            var courseTag = await _context.CourseTags
+            var courseTag = await ActiveCourseTagsQuery()
                 .FirstOrDefaultAsync(m => m.Id == id);
             if (courseTag == null)
             {
@@ -138,11 +148,15 @@ namespace Smart_Training_Institute_Portal.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            var courseTag = await _context.CourseTags.FindAsync(id);
-            if (courseTag != null)
+            var courseTag = await ActiveCourseTagsQuery()
+                .FirstOrDefaultAsync(t => t.Id == id);
+            if (courseTag == null)
             {
-                _context.CourseTags.Remove(courseTag);
+                return RedirectToAction(nameof(Index));
             }
+
+            courseTag.IsDeleted = true;
+            courseTag.DeletedAt = DateTime.UtcNow;
 
             await _context.SaveChangesAsync();
             TempData["Success"] = "Course tag deleted successfully.";
@@ -151,7 +165,14 @@ namespace Smart_Training_Institute_Portal.Controllers
 
         private bool CourseTagExists(int id)
         {
-            return _context.CourseTags.Any(e => e.Id == id);
+            return ActiveCourseTagsQuery().Any(e => e.Id == id);
+        }
+
+        private IQueryable<CourseTag> ActiveCourseTagsQuery()
+        {
+            return _context.CourseTags
+                .Where(t => t.IsDeleted != true)
+                .OrderBy(t => t.Name);
         }
     }
 }

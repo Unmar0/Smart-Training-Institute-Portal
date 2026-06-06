@@ -20,7 +20,8 @@ namespace Smart_Training_Institute_Portal.Controllers
         // GET: StudentProfiles
         public async Task<IActionResult> Index()
         {
-            var applicationDbContext = _context.StudentProfiles.Include(s => s.ApplicationUser);
+            var applicationDbContext = ActiveStudentProfilesQuery()
+                .Include(s => s.ApplicationUser);
             return View(await applicationDbContext.ToListAsync());
         }
 
@@ -32,7 +33,7 @@ namespace Smart_Training_Institute_Portal.Controllers
                 return NotFound();
             }
 
-            var studentProfile = await _context.StudentProfiles
+            var studentProfile = await ActiveStudentProfilesQuery()
                 .Include(s => s.ApplicationUser)
                 .FirstOrDefaultAsync(m => m.Id == id);
             if (studentProfile == null)
@@ -76,7 +77,7 @@ namespace Smart_Training_Institute_Portal.Controllers
                 return NotFound();
             }
 
-            var studentProfile = await _context.StudentProfiles.FindAsync(id);
+            var studentProfile = await ActiveStudentProfilesQuery().FirstOrDefaultAsync(s => s.Id == id);
             if (studentProfile == null)
             {
                 return NotFound();
@@ -101,7 +102,21 @@ namespace Smart_Training_Institute_Portal.Controllers
             {
                 try
                 {
-                    _context.Update(studentProfile);
+                    var existingStudentProfile = await ActiveStudentProfilesQuery()
+                        .FirstOrDefaultAsync(s => s.Id == id);
+
+                    if (existingStudentProfile == null)
+                    {
+                        return NotFound();
+                    }
+
+                    existingStudentProfile.FullName = studentProfile.FullName;
+                    existingStudentProfile.StudentNumber = studentProfile.StudentNumber;
+                    existingStudentProfile.ImageUrl = studentProfile.ImageUrl;
+                    existingStudentProfile.DateofBirth = studentProfile.DateofBirth;
+                    existingStudentProfile.ApplicationUserId = studentProfile.ApplicationUserId;
+                    existingStudentProfile.UpdatedAt = DateTime.UtcNow;
+
                     await _context.SaveChangesAsync();
                     TempData["Success"] = "Student profile updated successfully.";
                 }
@@ -130,7 +145,7 @@ namespace Smart_Training_Institute_Portal.Controllers
                 return NotFound();
             }
 
-            var studentProfile = await _context.StudentProfiles
+            var studentProfile = await ActiveStudentProfilesQuery()
                 .Include(s => s.ApplicationUser)
                 .FirstOrDefaultAsync(m => m.Id == id);
             if (studentProfile == null)
@@ -146,11 +161,15 @@ namespace Smart_Training_Institute_Portal.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            var studentProfile = await _context.StudentProfiles.FindAsync(id);
-            if (studentProfile != null)
+            var studentProfile = await ActiveStudentProfilesQuery()
+                .FirstOrDefaultAsync(s => s.Id == id);
+            if (studentProfile == null)
             {
-                _context.StudentProfiles.Remove(studentProfile);
+                return RedirectToAction(nameof(Index));
             }
+
+            studentProfile.IsDeleted = true;
+            studentProfile.DeletedAt = DateTime.UtcNow;
 
             await _context.SaveChangesAsync();
             TempData["Success"] = "Student profile deleted successfully.";
@@ -159,7 +178,13 @@ namespace Smart_Training_Institute_Portal.Controllers
 
         private bool StudentProfileExists(int id)
         {
-            return _context.StudentProfiles.Any(e => e.Id == id);
+            return ActiveStudentProfilesQuery().Any(e => e.Id == id);
+        }
+
+        private IQueryable<StudentProfile> ActiveStudentProfilesQuery()
+        {
+            return _context.StudentProfiles
+                .Where(s => s.IsDeleted != true);
         }
     }
 }

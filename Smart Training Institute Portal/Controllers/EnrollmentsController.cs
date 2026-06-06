@@ -25,7 +25,7 @@ namespace Smart_Training_Institute_Portal.Controllers
         [Authorize(Roles = "Admin,Instructor")]
         public async Task<IActionResult> Index()
         {
-            var enrollments = _context.Enrollments
+            var enrollments = ActiveEnrollmentsQuery()
                 .Include(e => e.Course)
                 .Include(e => e.StudentProfile)
                 .OrderByDescending(e => e.EnrollmentDate);
@@ -46,7 +46,7 @@ namespace Smart_Training_Institute_Portal.Controllers
                 return NotFound();
             }
 
-            var enrollments = await _context.Enrollments
+            var enrollments = await ActiveEnrollmentsQuery()
                 .Include(e => e.Course)
                 .ThenInclude(c => c.Department)
                 .Where(e => e.StudentProfileId == studentProfile.Id)
@@ -68,7 +68,7 @@ namespace Smart_Training_Institute_Portal.Controllers
                 return NotFound();
             }
 
-            var enrollments = await _context.Enrollments
+            var enrollments = await ActiveEnrollmentsQuery()
                 .Include(e => e.Course)
                 .Where(e => e.StudentProfileId == studentProfile.Id)
                 .ToListAsync();
@@ -89,7 +89,7 @@ namespace Smart_Training_Institute_Portal.Controllers
                 return NotFound();
             }
 
-            var completedEnrollments = await _context.Enrollments
+            var completedEnrollments = await ActiveEnrollmentsQuery()
                 .Include(e => e.Course)
                 .Where(e => e.StudentProfileId == studentProfile.Id && e.Mark != null)
                 .ToListAsync();
@@ -113,7 +113,7 @@ namespace Smart_Training_Institute_Portal.Controllers
                 return NotFound();
             }
 
-            var enrollment = await _context.Enrollments
+            var enrollment = await ActiveEnrollmentsQuery()
                 .Include(e => e.Course)
                 .Include(e => e.StudentProfile)
                 .FirstOrDefaultAsync(m => m.Id == id);
@@ -129,8 +129,8 @@ namespace Smart_Training_Institute_Portal.Controllers
         [Authorize(Roles = "Admin,Instructor")]
         public IActionResult Create()
         {
-            ViewData["CourseId"] = new SelectList(_context.Courses, "Id", "Title");
-            ViewData["StudentProfileId"] = new SelectList(_context.StudentProfiles, "Id", "FullName");
+            ViewData["CourseId"] = new SelectList(_context.Courses.Where(c => c.IsDeleted != true), "Id", "Title");
+            ViewData["StudentProfileId"] = new SelectList(_context.StudentProfiles.Where(s => s.IsDeleted != true), "Id", "FullName");
             return View();
         }
 
@@ -149,8 +149,8 @@ namespace Smart_Training_Institute_Portal.Controllers
                 TempData["Success"] = "Student enrolled successfully.";
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["CourseId"] = new SelectList(_context.Courses, "Id", "Code", enrollment.CourseId);
-            ViewData["StudentProfileId"] = new SelectList(_context.StudentProfiles, "Id", "FullName", enrollment.StudentProfileId);
+            ViewData["CourseId"] = new SelectList(_context.Courses.Where(c => c.IsDeleted != true), "Id", "Code", enrollment.CourseId);
+            ViewData["StudentProfileId"] = new SelectList(_context.StudentProfiles.Where(s => s.IsDeleted != true), "Id", "FullName", enrollment.StudentProfileId);
             return View(enrollment);
         }
 
@@ -163,13 +163,13 @@ namespace Smart_Training_Institute_Portal.Controllers
                 return NotFound();
             }
 
-            var enrollment = await _context.Enrollments.FindAsync(id);
+            var enrollment = await ActiveEnrollmentsQuery().FirstOrDefaultAsync(e => e.Id == id);
             if (enrollment == null)
             {
                 return NotFound();
             }
-            ViewData["CourseId"] = new SelectList(_context.Courses, "Id", "Code", enrollment.CourseId);
-            ViewData["StudentProfileId"] = new SelectList(_context.StudentProfiles, "Id", "FullName", enrollment.StudentProfileId);
+            ViewData["CourseId"] = new SelectList(_context.Courses.Where(c => c.IsDeleted != true), "Id", "Code", enrollment.CourseId);
+            ViewData["StudentProfileId"] = new SelectList(_context.StudentProfiles.Where(s => s.IsDeleted != true), "Id", "FullName", enrollment.StudentProfileId);
             return View(enrollment);
         }
 
@@ -190,7 +190,7 @@ namespace Smart_Training_Institute_Portal.Controllers
             {
                 try
                 {
-                    var oldEnrollment = await _context.Enrollments
+                    var oldEnrollment = await ActiveEnrollmentsQuery()
                         .AsNoTracking()
                         .FirstOrDefaultAsync(e => e.Id == id);
 
@@ -237,8 +237,8 @@ namespace Smart_Training_Institute_Portal.Controllers
                 }
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["CourseId"] = new SelectList(_context.Courses, "Id", "Code", enrollment.CourseId);
-            ViewData["StudentProfileId"] = new SelectList(_context.StudentProfiles, "Id", "FullName", enrollment.StudentProfileId);
+            ViewData["CourseId"] = new SelectList(_context.Courses.Where(c => c.IsDeleted != true), "Id", "Code", enrollment.CourseId);
+            ViewData["StudentProfileId"] = new SelectList(_context.StudentProfiles.Where(s => s.IsDeleted != true), "Id", "FullName", enrollment.StudentProfileId);
             return View(enrollment);
         }
 
@@ -251,7 +251,7 @@ namespace Smart_Training_Institute_Portal.Controllers
                 return NotFound();
             }
 
-            var enrollment = await _context.Enrollments
+            var enrollment = await ActiveEnrollmentsQuery()
                 .Include(e => e.Course)
                 .Include(e => e.StudentProfile)
                 .FirstOrDefaultAsync(m => m.Id == id);
@@ -269,11 +269,15 @@ namespace Smart_Training_Institute_Portal.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            var enrollment = await _context.Enrollments.FindAsync(id);
-            if (enrollment != null)
+            var enrollment = await ActiveEnrollmentsQuery()
+                .FirstOrDefaultAsync(e => e.Id == id);
+            if (enrollment == null)
             {
-                _context.Enrollments.Remove(enrollment);
+                return RedirectToAction(nameof(Index));
             }
+
+            enrollment.IsDeleted = true;
+            enrollment.DeletedAt = DateTime.UtcNow;
 
             await _context.SaveChangesAsync();
             TempData["Success"] = "Enrollment deleted successfully.";
@@ -282,7 +286,12 @@ namespace Smart_Training_Institute_Portal.Controllers
 
         private bool EnrollmentExists(int id)
         {
-            return _context.Enrollments.Any(e => e.Id == id);
+            return ActiveEnrollmentsQuery().Any(e => e.Id == id);
+        }
+
+        private IQueryable<Enrollment> ActiveEnrollmentsQuery()
+        {
+            return _context.Enrollments.Where(e => e.IsDeleted != true);
         }
     }
 }

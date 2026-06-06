@@ -20,7 +20,8 @@ namespace Smart_Training_Institute_Portal.Controllers
         // GET: InstructorProfiles
         public async Task<IActionResult> Index()
         {
-            var applicationDbContext = _context.InstructorProfiles.Include(i => i.ApplicationUser);
+            var applicationDbContext = ActiveInstructorProfilesQuery()
+                .Include(i => i.ApplicationUser);
             return View(await applicationDbContext.ToListAsync());
         }
 
@@ -32,7 +33,7 @@ namespace Smart_Training_Institute_Portal.Controllers
                 return NotFound();
             }
 
-            var instructorProfile = await _context.InstructorProfiles
+            var instructorProfile = await ActiveInstructorProfilesQuery()
                 .Include(i => i.ApplicationUser)
                 .FirstOrDefaultAsync(m => m.Id == id);
             if (instructorProfile == null)
@@ -44,9 +45,9 @@ namespace Smart_Training_Institute_Portal.Controllers
         }
 
         // GET: InstructorProfiles/Create
-        public IActionResult Create()
+        public async Task<IActionResult> Create()
         {
-            ViewData["ApplicationUserId"] = new SelectList(_context.Users, "Id", "Id");
+            await PopulateApplicationUsersAsync();
             return View();
         }
 
@@ -57,6 +58,8 @@ namespace Smart_Training_Institute_Portal.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("InstructorNumber,FullName,Specialization,Bio,ImageUrl,OfficeNumber,ApplicationUserId,Id")] InstructorProfile instructorProfile)
         {
+            await ValidateApplicationUserSelectionAsync(instructorProfile.ApplicationUserId);
+
             if (ModelState.IsValid)
             {
                 _context.Add(instructorProfile);
@@ -64,7 +67,8 @@ namespace Smart_Training_Institute_Portal.Controllers
                 TempData["Success"] = "Instructor profile created successfully.";
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["ApplicationUserId"] = new SelectList(_context.Users, "Id", "Id", instructorProfile.ApplicationUserId);
+
+            await PopulateApplicationUsersAsync(instructorProfile.ApplicationUserId);
             return View(instructorProfile);
         }
 
@@ -76,12 +80,12 @@ namespace Smart_Training_Institute_Portal.Controllers
                 return NotFound();
             }
 
-            var instructorProfile = await _context.InstructorProfiles.FindAsync(id);
+            var instructorProfile = await ActiveInstructorProfilesQuery().FirstOrDefaultAsync(i => i.Id == id);
             if (instructorProfile == null)
             {
                 return NotFound();
             }
-            ViewData["ApplicationUserId"] = new SelectList(_context.Users, "Id", "Id", instructorProfile.ApplicationUserId);
+            await PopulateApplicationUsersAsync(instructorProfile.ApplicationUserId);
             return View(instructorProfile);
         }
 
@@ -97,11 +101,29 @@ namespace Smart_Training_Institute_Portal.Controllers
                 return NotFound();
             }
 
+            await ValidateApplicationUserSelectionAsync(instructorProfile.ApplicationUserId, instructorProfile.Id);
+
             if (ModelState.IsValid)
             {
                 try
                 {
-                    _context.Update(instructorProfile);
+                    var existingInstructorProfile = await ActiveInstructorProfilesQuery()
+                        .FirstOrDefaultAsync(i => i.Id == id);
+
+                    if (existingInstructorProfile == null)
+                    {
+                        return NotFound();
+                    }
+
+                    existingInstructorProfile.InstructorNumber = instructorProfile.InstructorNumber;
+                    existingInstructorProfile.FullName = instructorProfile.FullName;
+                    existingInstructorProfile.Specialization = instructorProfile.Specialization;
+                    existingInstructorProfile.Bio = instructorProfile.Bio;
+                    existingInstructorProfile.ImageUrl = instructorProfile.ImageUrl;
+                    existingInstructorProfile.OfficeNumber = instructorProfile.OfficeNumber;
+                    existingInstructorProfile.ApplicationUserId = instructorProfile.ApplicationUserId;
+                    existingInstructorProfile.UpdatedAt = DateTime.UtcNow;
+
                     await _context.SaveChangesAsync();
                     TempData["Success"] = "Instructor profile updated successfully.";
                 }
@@ -118,7 +140,7 @@ namespace Smart_Training_Institute_Portal.Controllers
                 }
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["ApplicationUserId"] = new SelectList(_context.Users, "Id", "Id", instructorProfile.ApplicationUserId);
+            await PopulateApplicationUsersAsync(instructorProfile.ApplicationUserId);
             return View(instructorProfile);
         }
 
@@ -130,7 +152,7 @@ namespace Smart_Training_Institute_Portal.Controllers
                 return NotFound();
             }
 
-            var instructorProfile = await _context.InstructorProfiles
+            var instructorProfile = await ActiveInstructorProfilesQuery()
                 .Include(i => i.ApplicationUser)
                 .FirstOrDefaultAsync(m => m.Id == id);
             if (instructorProfile == null)
@@ -146,11 +168,15 @@ namespace Smart_Training_Institute_Portal.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            var instructorProfile = await _context.InstructorProfiles.FindAsync(id);
-            if (instructorProfile != null)
+            var instructorProfile = await ActiveInstructorProfilesQuery()
+                .FirstOrDefaultAsync(i => i.Id == id);
+            if (instructorProfile == null)
             {
-                _context.InstructorProfiles.Remove(instructorProfile);
+                return RedirectToAction(nameof(Index));
             }
+
+            instructorProfile.IsDeleted = true;
+            instructorProfile.DeletedAt = DateTime.UtcNow;
 
             await _context.SaveChangesAsync();
             TempData["Success"] = "Instructor profile deleted successfully.";
@@ -159,7 +185,54 @@ namespace Smart_Training_Institute_Portal.Controllers
 
         private bool InstructorProfileExists(int id)
         {
-            return _context.InstructorProfiles.Any(e => e.Id == id);
+            return ActiveInstructorProfilesQuery().Any(e => e.Id == id);
+        }
+
+        private IQueryable<InstructorProfile> ActiveInstructorProfilesQuery()
+        {
+            return _context.InstructorProfiles
+                .Where(i => i.IsDeleted != true);
+        }
+
+        private async Task PopulateApplicationUsersAsync(string? selectedUserId = null)
+        {
+            var availableUsers = await _context.Users
+                .Where(u => u.InstructorProfile == null || u.Id == selectedUserId)
+                .OrderBy(u => u.Email)
+                .Select(u => new
+                {
+                    u.Id,
+                    DisplayName = string.IsNullOrWhiteSpace(u.Email) ? u.Id : u.Email
+                })
+                .ToListAsync();
+
+            ViewData["ApplicationUserId"] = new SelectList(availableUsers, "Id", "DisplayName", selectedUserId);
+        }
+
+        private async Task ValidateApplicationUserSelectionAsync(string? applicationUserId, int? currentInstructorProfileId = null)
+        {
+            if (string.IsNullOrWhiteSpace(applicationUserId))
+            {
+                ModelState.AddModelError(nameof(InstructorProfile.ApplicationUserId), "Please select a user account.");
+                return;
+            }
+
+            var userExists = await _context.Users.AnyAsync(u => u.Id == applicationUserId);
+            if (!userExists)
+            {
+                ModelState.AddModelError(nameof(InstructorProfile.ApplicationUserId), "Selected user account does not exist.");
+                return;
+            }
+
+            var alreadyAssigned = await _context.InstructorProfiles
+                .AnyAsync(i => i.ApplicationUserId == applicationUserId
+                    && i.Id != currentInstructorProfileId
+                    && i.IsDeleted != true);
+
+            if (alreadyAssigned)
+            {
+                ModelState.AddModelError(nameof(InstructorProfile.ApplicationUserId), "This user already has an instructor profile.");
+            }
         }
     }
 }
