@@ -41,6 +41,9 @@
                         @if (User.Identity != null && User.Identity.IsAuthenticated && User.IsInRole("Admin"))
                         {
                             <li class="nav-item">
+                                <a class="nav-link" asp-controller="Users" asp-action="Index">Users</a>
+                            </li>
+                            <li class="nav-item">
                                 <a class="nav-link" asp-controller="Departments" asp-action="Index">Departments</a>
                             </li>
                             <li class="nav-item">

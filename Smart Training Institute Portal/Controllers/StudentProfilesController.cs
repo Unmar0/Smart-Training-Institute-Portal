@@ -45,9 +45,9 @@ namespace Smart_Training_Institute_Portal.Controllers
         }
 
         // GET: StudentProfiles/Create
-        public IActionResult Create()
+        public async Task<IActionResult> Create()
         {
-            ViewData["ApplicationUserId"] = new SelectList(_context.Users, "Id", "Id");
+            await PopulateApplicationUsersAsync();
             return View();
         }
 
@@ -65,7 +65,7 @@ namespace Smart_Training_Institute_Portal.Controllers
                 TempData["Success"] = "Student profile created successfully.";
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["ApplicationUserId"] = new SelectList(_context.Users, "Id", "Id", studentProfile.ApplicationUserId);
+            await PopulateApplicationUsersAsync(studentProfile.ApplicationUserId);
             return View(studentProfile);
         }
 
@@ -82,7 +82,7 @@ namespace Smart_Training_Institute_Portal.Controllers
             {
                 return NotFound();
             }
-            ViewData["ApplicationUserId"] = new SelectList(_context.Users, "Id", "Id", studentProfile.ApplicationUserId);
+            await PopulateApplicationUsersAsync(studentProfile.ApplicationUserId);
             return View(studentProfile);
         }
 
@@ -133,7 +133,7 @@ namespace Smart_Training_Institute_Portal.Controllers
                 }
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["ApplicationUserId"] = new SelectList(_context.Users, "Id", "Id", studentProfile.ApplicationUserId);
+            await PopulateApplicationUsersAsync(studentProfile.ApplicationUserId);
             return View(studentProfile);
         }
 
@@ -185,6 +185,21 @@ namespace Smart_Training_Institute_Portal.Controllers
         {
             return _context.StudentProfiles
                 .Where(s => s.IsDeleted != true);
+        }
+
+        private async Task PopulateApplicationUsersAsync(string? selectedUserId = null)
+        {
+            var availableUsers = await _context.Users
+                .Where(u => u.StudentProfile == null || u.Id == selectedUserId)
+                .OrderBy(u => u.Email)
+                .Select(u => new
+                {
+                    u.Id,
+                    DisplayName = string.IsNullOrWhiteSpace(u.Email) ? u.Id : u.Email
+                })
+                .ToListAsync();
+
+            ViewData["ApplicationUserId"] = new SelectList(availableUsers, "Id", "DisplayName", selectedUserId);
         }
     }
 }

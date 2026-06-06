@@ -142,6 +142,8 @@ namespace Smart_Training_Institute_Portal.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("EnrollmentDate,Mark,Grade,Status,StudentProfileId,CourseId,Id")] Enrollment enrollment)
         {
+            await ValidateEnrollmentSelectionAsync(enrollment);
+
             if (ModelState.IsValid)
             {
                 _context.Add(enrollment);
@@ -149,7 +151,7 @@ namespace Smart_Training_Institute_Portal.Controllers
                 TempData["Success"] = "Student enrolled successfully.";
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["CourseId"] = new SelectList(_context.Courses.Where(c => c.IsDeleted != true), "Id", "Code", enrollment.CourseId);
+            ViewData["CourseId"] = new SelectList(_context.Courses.Where(c => c.IsDeleted != true), "Id", "Title", enrollment.CourseId);
             ViewData["StudentProfileId"] = new SelectList(_context.StudentProfiles.Where(s => s.IsDeleted != true), "Id", "FullName", enrollment.StudentProfileId);
             return View(enrollment);
         }
@@ -168,7 +170,7 @@ namespace Smart_Training_Institute_Portal.Controllers
             {
                 return NotFound();
             }
-            ViewData["CourseId"] = new SelectList(_context.Courses.Where(c => c.IsDeleted != true), "Id", "Code", enrollment.CourseId);
+            ViewData["CourseId"] = new SelectList(_context.Courses.Where(c => c.IsDeleted != true), "Id", "Title", enrollment.CourseId);
             ViewData["StudentProfileId"] = new SelectList(_context.StudentProfiles.Where(s => s.IsDeleted != true), "Id", "FullName", enrollment.StudentProfileId);
             return View(enrollment);
         }
@@ -185,6 +187,8 @@ namespace Smart_Training_Institute_Portal.Controllers
             {
                 return NotFound();
             }
+
+            await ValidateEnrollmentSelectionAsync(enrollment, id);
 
             if (ModelState.IsValid)
             {
@@ -237,7 +241,7 @@ namespace Smart_Training_Institute_Portal.Controllers
                 }
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["CourseId"] = new SelectList(_context.Courses.Where(c => c.IsDeleted != true), "Id", "Code", enrollment.CourseId);
+            ViewData["CourseId"] = new SelectList(_context.Courses.Where(c => c.IsDeleted != true), "Id", "Title", enrollment.CourseId);
             ViewData["StudentProfileId"] = new SelectList(_context.StudentProfiles.Where(s => s.IsDeleted != true), "Id", "FullName", enrollment.StudentProfileId);
             return View(enrollment);
         }
@@ -292,6 +296,52 @@ namespace Smart_Training_Institute_Portal.Controllers
         private IQueryable<Enrollment> ActiveEnrollmentsQuery()
         {
             return _context.Enrollments.Where(e => e.IsDeleted != true);
+        }
+
+        private async Task ValidateEnrollmentSelectionAsync(Enrollment enrollment, int? currentId = null)
+        {
+            if (enrollment.StudentProfileId == null)
+            {
+                ModelState.AddModelError(nameof(Enrollment.StudentProfileId), "Please select a student.");
+                return;
+            }
+
+            if (enrollment.CourseId == null)
+            {
+                ModelState.AddModelError(nameof(Enrollment.CourseId), "Please select a course.");
+                return;
+            }
+
+            var studentExists = await _context.StudentProfiles
+                .AnyAsync(s => s.Id == enrollment.StudentProfileId && s.IsDeleted != true);
+
+            if (!studentExists)
+            {
+                ModelState.AddModelError(nameof(Enrollment.StudentProfileId), "Selected student does not exist.");
+            }
+
+            var courseExists = await _context.Courses
+                .AnyAsync(c => c.Id == enrollment.CourseId && c.IsDeleted != true);
+
+            if (!courseExists)
+            {
+                ModelState.AddModelError(nameof(Enrollment.CourseId), "Selected course does not exist.");
+            }
+
+            if (!ModelState.IsValid)
+            {
+                return;
+            }
+
+            var alreadyEnrolled = await ActiveEnrollmentsQuery()
+                .AnyAsync(e => e.StudentProfileId == enrollment.StudentProfileId
+                    && e.CourseId == enrollment.CourseId
+                    && e.Id != currentId);
+
+            if (alreadyEnrolled)
+            {
+                ModelState.AddModelError(string.Empty, "This student is already enrolled in the selected course.");
+            }
         }
     }
 }

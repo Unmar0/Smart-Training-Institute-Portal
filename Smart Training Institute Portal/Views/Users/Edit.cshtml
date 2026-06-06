@@ -1,0 +1,95 @@
+@model Smart_Training_Institute_Portal.ViewModels.UserEditViewModel
+
+@{
+    ViewData["Title"] = "Edit User";
+}
+
+<div class="page-header d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3">
+    <div>
+        <h1 class="page-title"><i class="bi bi-pencil-square me-2 text-danger"></i>Edit User</h1>
+        <p class="page-subtitle">Update account details, role, and optionally reset the password.</p>
+    </div>
+    <div class="sti-action-bar">
+        <a asp-action="Index" class="btn btn-danger">
+            Back to List
+        </a>
+    </div>
+</div>
+
+<div class="row justify-content-center">
+    <div class="col-lg-10">
+        <div class="card sti-card">
+            <div class="card-body">
+                <form asp-action="Edit">
+                    <input type="hidden" asp-for="Id" />
+                    <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <div class="form-floating">
+                                <input asp-for="UserName" class="form-control" placeholder="User Name" />
+                                <label asp-for="UserName" class="fw-semibold"></label>
+                            </div>
+                            <span asp-validation-for="UserName" class="text-danger"></span>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-floating">
+                                <input asp-for="Email" class="form-control" placeholder="Email" />
+                                <label asp-for="Email" class="fw-semibold"></label>
+                            </div>
+                            <span asp-validation-for="Email" class="text-danger"></span>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-floating">
+                                <input asp-for="PhoneNumber" class="form-control" placeholder="Phone Number" />
+                                <label asp-for="PhoneNumber" class="fw-semibold"></label>
+                            </div>
+                            <span asp-validation-for="PhoneNumber" class="text-danger"></span>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-floating">
+                                <select asp-for="SelectedRole" class="form-select" asp-items="ViewBag.SelectedRole">
+                                    <option value="">Select a role</option>
+                                </select>
+                                <label asp-for="SelectedRole" class="fw-semibold"></label>
+                            </div>
+                            <span asp-validation-for="SelectedRole" class="text-danger"></span>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-floating">
+                                <input asp-for="NewPassword" class="form-control" placeholder="New Password" />
+                                <label asp-for="NewPassword" class="fw-semibold"></label>
+                            </div>
+                            <span asp-validation-for="NewPassword" class="text-danger"></span>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-floating">
+                                <input asp-for="ConfirmNewPassword" class="form-control" placeholder="Confirm New Password" />
+                                <label asp-for="ConfirmNewPassword" class="fw-semibold"></label>
+                            </div>
+                            <span asp-validation-for="ConfirmNewPassword" class="text-danger"></span>
+                        </div>
+                        <div class="col-12">
+                            <div class="form-check form-switch">
+                                <input asp-for="EmailConfirmed" class="form-check-input" />
+                                <label asp-for="EmailConfirmed" class="form-check-label fw-semibold"></label>
+                            </div>
+                            <span asp-validation-for="EmailConfirmed" class="text-danger"></span>
+                        </div>
+                    </div>
+                    <div class="d-flex justify-content-end gap-2 mt-4">
+                        <a asp-action="Index" class="btn btn-danger">
+                            Cancel
+                        </a>
+                        <button type="submit" class="btn btn-primary">
+                            Save Changes
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

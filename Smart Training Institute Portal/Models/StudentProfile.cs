@@ -19,7 +19,7 @@ namespace Smart_Training_Institute_Portal.Models
         public DateOnly? DateofBirth { get; set; }
 
         public string ApplicationUserId { get; set; }
-        public ApplicationUser ApplicationUser { get; set; }
+        public ApplicationUser? ApplicationUser { get; set; }
 
         public ICollection<Enrollment> Enrollments { get; set; } = new List<Enrollment>();
 

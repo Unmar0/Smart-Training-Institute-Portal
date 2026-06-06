@@ -25,7 +25,7 @@ namespace Smart_Training_Institute_Portal.Models
         public string? OfficeNumber { get; set; }
 
         public string ApplicationUserId { get; set; }
-        public ApplicationUser ApplicationUser { get; set; }
+        public ApplicationUser? ApplicationUser { get; set; }
 
         public ICollection<CourseInstructor> CourseInstructors { get; set; } = new List<CourseInstructor>();
     }

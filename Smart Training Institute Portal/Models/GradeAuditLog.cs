@@ -22,9 +22,9 @@ namespace Smart_Training_Institute_Portal.Models
 
 
         public int? EnrollmentId { get; set; }
-        public Enrollment Enrollment { get; set; } = null!;
+        public Enrollment? Enrollment { get; set; }
 
         public string ChangedBy { get; set; } = string.Empty;
-        public ApplicationUser ChangedByUser { get; set; } = null!;
+        public ApplicationUser? ChangedByUser { get; set; }
     }
 }
